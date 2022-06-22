@@ -45,36 +45,10 @@ import {
 	Wallet,
 } from 'web3-eth-accounts';
 import { Address } from 'web3-utils';
+import { Web3EthInterface } from './types';
 
 export class Web3 extends Web3Context<EthExecutionAPI> {
-	public eth: Eth & {
-		Iban: typeof Iban;
-		ens: ENS;
-		Contract: typeof Contract & {
-			setProvider: (provider: SupportedProviders<EthExecutionAPI>) => void;
-		};
-		abi: {
-			encodeEventSignature: typeof encodeFunctionSignature;
-			encodeFunctionCall: typeof encodeFunctionCall;
-			encodeFunctionSignature: typeof encodeFunctionSignature;
-			encodeParameter: typeof encodeParameter;
-			encodeParameters: typeof encodeParameters;
-			decodeParameter: typeof decodeParameter;
-			decodeParameters: typeof decodeParameters;
-			decodeLog: typeof decodeLog;
-		};
-		accounts: {
-			create: typeof create;
-			privateKeyToAccount: typeof privateKeyToAccount;
-			signTransaction: typeof signTransaction;
-			recoverTransaction: typeof recoverTransaction;
-			hashMessage: typeof hashMessage;
-			sign: typeof sign;
-			recover: typeof recover;
-			encrypt: typeof encrypt;
-			decrypt: typeof decrypt;
-		};
-	};
+	public eth: Web3EthInterface;
 
 	public constructor(provider: SupportedProviders<EthExecutionAPI>) {
 		const accountProvider = {
