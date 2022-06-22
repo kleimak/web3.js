@@ -20,11 +20,11 @@
  * @date 2017
  */
 
-var BN = require('bn.js');
-var numberToBN = require('number-to-bn');
-var utf8 = require('utf8');
-var ethereumjsUtil = require('ethereumjs-util');
-var ethereumBloomFilters = require('ethereum-bloom-filters');
+var BN = require("bn.js");
+var numberToBN = require("number-to-bn");
+var utf8 = require("utf8");
+var ethereumjsUtil = require("ethereumjs-util");
+var ethereumBloomFilters = require("ethereum-bloom-filters");
 
 /**
  * Returns true if object is BN, otherwise false
@@ -45,7 +45,9 @@ var isBN = function (object) {
  * @return {Boolean}
  */
 var isBigNumber = function (object) {
-    return object && object.constructor && object.constructor.name === 'BigNumber';
+    return (
+        object && object.constructor && object.constructor.name === "BigNumber"
+    );
 };
 
 /**
@@ -55,14 +57,13 @@ var isBigNumber = function (object) {
  * @param {Number|String|BN} number, string, HEX string or BN
  * @return {BN} BN
  */
-var toBN = function(number){
+var toBN = function (number) {
     try {
         return numberToBN.apply(null, arguments);
-    } catch(e) {
-        throw new Error(e + ' Given value: "'+ number +'"');
+    } catch (e) {
+        throw new Error(e + ' Given value: "' + number + '"');
     }
 };
-
 
 /**
  * Takes and input transforms it into BN and if it is negative value, into two's complement
@@ -72,7 +73,7 @@ var toBN = function(number){
  * @return {String}
  */
 var toTwosComplement = function (number) {
-    return '0x'+ toBN(number).toTwos(256).toString(16, 64);
+    return "0x" + toBN(number).toTwos(256).toString(16, 64);
 };
 
 /**
@@ -87,15 +88,16 @@ var isAddress = function (address) {
     if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
         return false;
         // If it's ALL lowercase or ALL upppercase
-    } else if (/^(0x|0X)?[0-9a-f]{40}$/.test(address) || /^(0x|0X)?[0-9A-F]{40}$/.test(address)) {
+    } else if (
+        /^(0x|0X)?[0-9a-f]{40}$/.test(address) ||
+        /^(0x|0X)?[0-9A-F]{40}$/.test(address)
+    ) {
         return true;
         // Otherwise check each case
     } else {
         return checkAddressChecksum(address);
     }
 };
-
-
 
 /**
  * Checks if the given string is a checksummed address
@@ -106,12 +108,17 @@ var isAddress = function (address) {
  */
 var checkAddressChecksum = function (address) {
     // Check each case
-    address = address.replace(/^0x/i,'');
-    var addressHash = sha3(address.toLowerCase()).replace(/^0x/i,'');
+    address = address.replace(/^0x/i, "");
+    var addressHash = sha3(address.toLowerCase()).replace(/^0x/i, "");
 
-    for (var i = 0; i < 40; i++ ) {
+    for (var i = 0; i < 40; i++) {
         // the nth letter should be uppercase if the nth digit of casemap is 1
-        if ((parseInt(addressHash[i], 16) > 7 && address[i].toUpperCase() !== address[i]) || (parseInt(addressHash[i], 16) <= 7 && address[i].toLowerCase() !== address[i])) {
+        if (
+            (parseInt(addressHash[i], 16) > 7 &&
+                address[i].toUpperCase() !== address[i]) ||
+            (parseInt(addressHash[i], 16) <= 7 &&
+                address[i].toLowerCase() !== address[i])
+        ) {
             return false;
         }
     }
@@ -128,12 +135,17 @@ var checkAddressChecksum = function (address) {
  * @returns {String} right aligned string
  */
 var leftPad = function (string, chars, sign) {
-    var hasPrefix = /^0x/i.test(string) || typeof string === 'number';
-    string = string.toString(16).replace(/^0x/i,'');
+    var hasPrefix = /^0x/i.test(string) || typeof string === "number";
+    string = string.toString(16).replace(/^0x/i, "");
 
-    var padding = (chars - string.length + 1 >= 0) ? chars - string.length + 1 : 0;
+    var padding =
+        chars - string.length + 1 >= 0 ? chars - string.length + 1 : 0;
 
-    return (hasPrefix ? '0x' : '') + new Array(padding).join(sign ? sign : "0") + string;
+    return (
+        (hasPrefix ? "0x" : "") +
+        new Array(padding).join(sign ? sign : "0") +
+        string
+    );
 };
 
 /**
@@ -146,14 +158,18 @@ var leftPad = function (string, chars, sign) {
  * @returns {String} right aligned string
  */
 var rightPad = function (string, chars, sign) {
-    var hasPrefix = /^0x/i.test(string) || typeof string === 'number';
-    string = string.toString(16).replace(/^0x/i,'');
+    var hasPrefix = /^0x/i.test(string) || typeof string === "number";
+    string = string.toString(16).replace(/^0x/i, "");
 
-    var padding = (chars - string.length + 1 >= 0) ? chars - string.length + 1 : 0;
+    var padding =
+        chars - string.length + 1 >= 0 ? chars - string.length + 1 : 0;
 
-    return (hasPrefix ? '0x' : '') + string + (new Array(padding).join(sign ? sign : "0"));
+    return (
+        (hasPrefix ? "0x" : "") +
+        string +
+        new Array(padding).join(sign ? sign : "0")
+    );
 };
-
 
 /**
  * Should be called to get hex representation (prefixed by 0x) of utf8 string
@@ -162,21 +178,21 @@ var rightPad = function (string, chars, sign) {
  * @param {String} str
  * @returns {String} hex representation of input string
  */
-var utf8ToHex = function(str) {
+var utf8ToHex = function (str) {
     str = utf8.encode(str);
     var hex = "";
 
     // remove \u0000 padding from either side
-    str = str.replace(/^(?:\u0000)*/,'');
+    str = str.replace(/^(?:\u0000)*/, "");
     str = str.split("").reverse().join("");
-    str = str.replace(/^(?:\u0000)*/,'');
+    str = str.replace(/^(?:\u0000)*/, "");
     str = str.split("").reverse().join("");
 
-    for(var i = 0; i < str.length; i++) {
+    for (var i = 0; i < str.length; i++) {
         var code = str.charCodeAt(i);
         // if (code !== 0) {
         var n = code.toString(16);
-        hex += n.length < 2 ? '0' + n : n;
+        hex += n.length < 2 ? "0" + n : n;
         // }
     }
 
@@ -190,23 +206,25 @@ var utf8ToHex = function(str) {
  * @param {String} hex
  * @returns {String} ascii string representation of hex value
  */
-var hexToUtf8 = function(hex) {
+var hexToUtf8 = function (hex) {
     if (!isHexStrict(hex))
-        throw new Error('The parameter "'+ hex +'" must be a valid HEX string.');
+        throw new Error(
+            'The parameter "' + hex + '" must be a valid HEX string.'
+        );
 
     var str = "";
     var code = 0;
-    hex = hex.replace(/^0x/i,'');
+    hex = hex.replace(/^0x/i, "");
 
     // remove 00 padding from either side
-    hex = hex.replace(/^(?:00)*/,'');
+    hex = hex.replace(/^(?:00)*/, "");
     hex = hex.split("").reverse().join("");
-    hex = hex.replace(/^(?:00)*/,'');
+    hex = hex.replace(/^(?:00)*/, "");
     hex = hex.split("").reverse().join("");
 
     var l = hex.length;
 
-    for (var i=0; i < l; i+=2) {
+    for (var i = 0; i < l; i += 2) {
         code = parseInt(hex.slice(i, i + 2), 16);
         // if (code !== 0) {
         str += String.fromCharCode(code);
@@ -215,7 +233,6 @@ var hexToUtf8 = function(hex) {
 
     return utf8.decode(str);
 };
-
 
 /**
  * Converts value to it's number representation
@@ -229,11 +246,22 @@ var hexToNumber = function (value) {
         return value;
     }
 
-    if (typeof value === 'string' && !isHexStrict(value)) {
-        throw new Error('Given value "'+value+'" is not a valid hex string.');
+    if (typeof value === "string" && !isHexStrict(value)) {
+        throw new Error(
+            'Given value "' + value + '" is not a valid hex string.'
+        );
     }
 
-    return toBN(value).toNumber();
+    const [negative, hexValue] = value.startsWith("-")
+        ? [true, value.slice(1)]
+        : [false, value];
+    const num = toBN(hexValue);
+
+    if (num > Number.MAX_SAFE_INTEGER) {
+        return negative ? -num : num;
+    }
+
+    return negative ? -1 * num.toNumber() : num.toNumber();
 };
 
 /**
@@ -246,13 +274,14 @@ var hexToNumber = function (value) {
 var hexToNumberString = function (value) {
     if (!value) return value;
 
-    if (typeof value === 'string' && !isHexStrict(value)) {
-        throw new Error('Given value "'+value+'" is not a valid hex string.');
+    if (typeof value === "string" && !isHexStrict(value)) {
+        throw new Error(
+            'Given value "' + value + '" is not a valid hex string.'
+        );
     }
 
     return toBN(value).toString(10);
 };
-
 
 /**
  * Converts value to it's hex representation
@@ -262,20 +291,19 @@ var hexToNumberString = function (value) {
  * @return {String}
  */
 var numberToHex = function (value) {
-    if ((value === null || value === undefined)) {
+    if (value === null || value === undefined) {
         return value;
     }
 
     if (!isFinite(value) && !isHexStrict(value)) {
-        throw new Error('Given input "'+value+'" is not a number.');
+        throw new Error('Given input "' + value + '" is not a number.');
     }
 
     var number = toBN(value);
     var result = number.toString(16);
 
-    return number.lt(new BN(0)) ? '-0x' + result.slice(1) : '0x' + result;
+    return number.lt(new BN(0)) ? "-0x" + result.slice(1) : "0x" + result;
 };
-
 
 /**
  * Convert a byte array to a hex string
@@ -286,14 +314,14 @@ var numberToHex = function (value) {
  * @param {Array} bytes
  * @return {String} the hex string
  */
-var bytesToHex = function(bytes) {
+var bytesToHex = function (bytes) {
     for (var hex = [], i = 0; i < bytes.length; i++) {
         /* jshint ignore:start */
         hex.push((bytes[i] >>> 4).toString(16));
-        hex.push((bytes[i] & 0xF).toString(16));
+        hex.push((bytes[i] & 0xf).toString(16));
         /* jshint ignore:end */
     }
-    return '0x'+ hex.join("");
+    return "0x" + hex.join("");
 };
 
 /**
@@ -305,14 +333,14 @@ var bytesToHex = function(bytes) {
  * @param {string} hex
  * @return {Array} the byte array
  */
-var hexToBytes = function(hex) {
+var hexToBytes = function (hex) {
     hex = hex.toString(16);
 
     if (!isHexStrict(hex)) {
-        throw new Error('Given value "'+ hex +'" is not a valid hex string.');
+        throw new Error('Given value "' + hex + '" is not a valid hex string.');
     }
 
-    hex = hex.replace(/^0x/i,'');
+    hex = hex.replace(/^0x/i, "");
 
     for (var bytes = [], c = 0; c < hex.length; c += 2)
         bytes.push(parseInt(hex.slice(c, c + 2), 16));
@@ -333,35 +361,41 @@ var toHex = function (value, returnType) {
     /*jshint maxcomplexity: false */
 
     if (isAddress(value)) {
-        return returnType ? 'address' : '0x'+ value.toLowerCase().replace(/^0x/i,'');
+        return returnType
+            ? "address"
+            : "0x" + value.toLowerCase().replace(/^0x/i, "");
     }
 
-    if (typeof value === 'boolean' ) {
-        return returnType ? 'bool' : value ? '0x01' : '0x00';
+    if (typeof value === "boolean") {
+        return returnType ? "bool" : value ? "0x01" : "0x00";
     }
 
     if (Buffer.isBuffer(value)) {
-        return '0x' + value.toString('hex');
+        return "0x" + value.toString("hex");
     }
 
-    if (typeof value === 'object' && !!value && !isBigNumber(value) && !isBN(value)) {
-        return returnType ? 'string' : utf8ToHex(JSON.stringify(value));
+    if (
+        typeof value === "object" &&
+        !!value &&
+        !isBigNumber(value) &&
+        !isBN(value)
+    ) {
+        return returnType ? "string" : utf8ToHex(JSON.stringify(value));
     }
 
     // if its a negative number, pass it through numberToHex
-    if (typeof value === 'string') {
-        if (value.indexOf('-0x') === 0 || value.indexOf('-0X') === 0) {
-            return returnType ? 'int256' : numberToHex(value);
-        } else if(value.indexOf('0x') === 0 || value.indexOf('0X') === 0) {
-            return returnType ? 'bytes' : value;
+    if (typeof value === "string") {
+        if (value.indexOf("-0x") === 0 || value.indexOf("-0X") === 0) {
+            return returnType ? "int256" : numberToHex(value);
+        } else if (value.indexOf("0x") === 0 || value.indexOf("0X") === 0) {
+            return returnType ? "bytes" : value;
         } else if (!isFinite(value)) {
-            return returnType ? 'string' : utf8ToHex(value);
+            return returnType ? "string" : utf8ToHex(value);
         }
     }
 
-    return returnType ? (value < 0 ? 'int256' : 'uint256') : numberToHex(value);
+    return returnType ? (value < 0 ? "int256" : "uint256") : numberToHex(value);
 };
-
 
 /**
  * Check if string is HEX, requires a 0x in front
@@ -371,7 +405,10 @@ var toHex = function (value, returnType) {
  * @returns {Boolean}
  */
 var isHexStrict = function (hex) {
-    return ((typeof hex === 'string' || typeof hex === 'number') && /^(-)?0x[0-9a-f]*$/i.test(hex));
+    return (
+        (typeof hex === "string" || typeof hex === "number") &&
+        /^(-)?0x[0-9a-f]*$/i.test(hex)
+    );
 };
 
 /**
@@ -382,7 +419,10 @@ var isHexStrict = function (hex) {
  * @returns {Boolean}
  */
 var isHex = function (hex) {
-    return ((typeof hex === 'string' || typeof hex === 'number') && /^(-0x|0x)?[0-9a-f]*$/i.test(hex));
+    return (
+        (typeof hex === "string" || typeof hex === "number") &&
+        /^(-0x|0x)?[0-9a-f]*$/i.test(hex)
+    );
 };
 
 /**
@@ -393,8 +433,7 @@ var isHex = function (hex) {
  * @returns {String}
  */
 var stripHexPrefix = function (str) {
-    if (str !== 0 && isHex(str))
-        return str.replace(/^(-)?0x/i, '$1')
+    if (str !== 0 && isHex(str)) return str.replace(/^(-)?0x/i, "$1");
     return str;
 };
 
@@ -419,7 +458,10 @@ var isBloom = function (bloom) {
  * @return {Boolean}
  */
 var isUserEthereumAddressInBloom = function (bloom, ethereumAddress) {
-    return ethereumBloomFilters.isUserEthereumAddressInBloom(bloom, ethereumAddress);
+    return ethereumBloomFilters.isUserEthereumAddressInBloom(
+        bloom,
+        ethereumAddress
+    );
 };
 
 /**
@@ -432,7 +474,10 @@ var isUserEthereumAddressInBloom = function (bloom, ethereumAddress) {
  * @return {Boolean}
  */
 var isContractAddressInBloom = function (bloom, contractAddress) {
-    return ethereumBloomFilters.isContractAddressInBloom(bloom, contractAddress);
+    return ethereumBloomFilters.isContractAddressInBloom(
+        bloom,
+        contractAddress
+    );
 };
 
 /**
@@ -480,23 +525,26 @@ var isInBloom = function (bloom, topic) {
  * @method sha3
  * @return {String} the sha3 string
  */
-var SHA3_NULL_S = '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+var SHA3_NULL_S =
+    "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470";
 
 var sha3 = function (value) {
     if (isBN(value)) {
         value = value.toString();
     }
 
-    if (isHexStrict(value) && /^0x/i.test((value).toString())) {
+    if (isHexStrict(value) && /^0x/i.test(value.toString())) {
         value = ethereumjsUtil.toBuffer(value);
-    } else if (typeof value === 'string') {
+    } else if (typeof value === "string") {
         // Assume value is an arbitrary string
-        value = Buffer.from(value, 'utf-8');
+        value = Buffer.from(value, "utf-8");
     }
 
-    var returnValue = ethereumjsUtil.bufferToHex(ethereumjsUtil.keccak256(value));
+    var returnValue = ethereumjsUtil.bufferToHex(
+        ethereumjsUtil.keccak256(value)
+    );
 
-    if(returnValue === SHA3_NULL_S) {
+    if (returnValue === SHA3_NULL_S) {
         return null;
     } else {
         return returnValue;
@@ -512,7 +560,7 @@ sha3._Hash = ethereumjsUtil.keccak256;
  *
  * @returns {string}
  */
-var sha3Raw = function(value) {
+var sha3Raw = function (value) {
     value = sha3(value);
 
     if (value === null) {
@@ -530,20 +578,21 @@ var sha3Raw = function(value) {
  * @param {String|Number|BN} value
  * @return {Number}
  */
-var toNumber = function(value) {
-    return typeof value === 'number' ? value : hexToNumber(toHex(value));
-}
+var toNumber = function (value) {
+    return typeof value === "number" ? value : hexToNumber(toHex(value));
+};
 
 // 1.x currently accepts 0x... strings, bn.js after update doesn't. it would be a breaking change
 var BNwrapped = function (value) {
     // check negative
     if (typeof value == "string" && value.includes("0x")) {
-        const [negative, hexValue] = value.toLocaleLowerCase().startsWith('-') ? ["-", value.slice(3)] : ["", value.slice(2)];
+        const [negative, hexValue] = value.toLocaleLowerCase().startsWith("-")
+            ? ["-", value.slice(3)]
+            : ["", value.slice(2)];
         return new BN(negative + hexValue, 16);
-    }
-    else {
+    } else {
         return new BN(value);
-    } 
+    }
 };
 Object.setPrototypeOf(BNwrapped, BN);
 Object.setPrototypeOf(BNwrapped.prototype, BN.prototype);
@@ -577,5 +626,5 @@ module.exports = {
     toTwosComplement: toTwosComplement,
     sha3: sha3,
     sha3Raw: sha3Raw,
-    toNumber: toNumber
+    toNumber: toNumber,
 };
